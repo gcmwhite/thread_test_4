@@ -17,7 +17,7 @@ public:
 private:
     bool isPause;
     bool isStop;
-    QMutex mutex;
+    QMutex mutex,mutex2;
 //    QThread thread;
 
 signals:

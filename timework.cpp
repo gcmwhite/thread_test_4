@@ -1,9 +1,11 @@
 #include "timework.h"
 #include <QDebug>
+#include <QMutexLocker>
 
 TimeWork::TimeWork(QObject *parent)
     :QObject(parent)
 {
+    QMutexLocker lock(&mutex2);
     isPause = false;
     isStop = true;
 }
@@ -12,7 +14,9 @@ void TimeWork::start()
 {
     qDebug() << "子线程启动：" << QThread::currentThread();
     int count = 0;
+    mutex2.lock();
     isStop = false;
+    mutex2.unlock();
     while (!isStop) {
         emit countSignal(count++);
         QThread::msleep(200);
@@ -29,6 +33,7 @@ void TimeWork::pause()
         qDebug() << "线程未启动！";
         return ;
     }
+    QMutexLocker lock(&mutex2);
     isPause = !isPause;
     if (isPause)
     {
@@ -40,6 +45,7 @@ void TimeWork::pause()
 
 void TimeWork::close()
 {
+
     if (isStop)
     {
         qDebug() << "线程未启动！";
@@ -50,5 +56,6 @@ void TimeWork::close()
         mutex.unlock();
         isPause = false;
     }
+    QMutexLocker lock(&mutex2);
     isStop = true;
 }
